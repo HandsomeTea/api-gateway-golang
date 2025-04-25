@@ -3,6 +3,7 @@ package response
 import (
 	"encoding/json"
 	"net/http"
+	"runtime/debug"
 
 	httpError "api-gateway-golang/server/configs/error"
 	"api-gateway-golang/server/configs/logger"
@@ -31,11 +32,14 @@ func (response *response) Success(data ...any) {
 	if len(data) == 0 {
 		result = gin.H{}
 	}
-	responseDataJson, _ := json.MarshalIndent(result, "", "    ")
-	logger.TraceLog.Info("[http-response] " + response.ctx.Request.Method + ": " + response.ctx.Request.URL.RequestURI() + " => " + string(responseDataJson))
+	responseDataJson, err := json.MarshalIndent(result, "", "    ")
 
+	if err != nil {
+		panic(globals.NewException(err.Error()))
+	}
+
+	logger.TraceLog.Info("[http-response] " + response.ctx.Request.Method + ": " + response.ctx.Request.URL.RequestURI() + " => " + string(responseDataJson))
 	response.ctx.JSON(http.StatusOK, result)
-	response.ctx.Abort()
 }
 
 /**
@@ -52,8 +56,20 @@ func (response *response) Failed(data ...any) {
 	errorException := globals.NewException(data...)
 	status := httpError.ErrorCodeMap[errorException.Code]
 
-	responseDataJson, _ := json.MarshalIndent(errorException, "", "    ")
-	logger.TraceLog.Info("[http-response] " + response.ctx.Request.Method + ": " + response.ctx.Request.URL.RequestURI() + " => " + string(responseDataJson))
+	responseDataJson, err := json.MarshalIndent(errorException, "", "    ")
+
+	if err != nil {
+		message := err.Error()
+
+		logger.SystemLog.Error(message + "\n" + string(debug.Stack()))
+		errorException = globals.NewException(message)
+		jsonData, _ := json.MarshalIndent(errorException, "", "    ")
+
+		logger.TraceLog.Error("[http-response] " + response.ctx.Request.Method + ": " + response.ctx.Request.URL.RequestURI() + " => " + string(jsonData))
+		response.ctx.JSON(status, errorException)
+		return
+	}
+
+	logger.TraceLog.Error("[http-response] " + response.ctx.Request.Method + ": " + response.ctx.Request.URL.RequestURI() + " => " + string(responseDataJson))
 	response.ctx.JSON(status, errorException)
-	response.ctx.Abort()
 }

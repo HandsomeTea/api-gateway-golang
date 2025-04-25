@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	"api-gateway-golang/server/configs/env"
+	"api-gateway-golang/server/globals"
 )
 
 var logLevels = map[string]zapcore.Level{
@@ -66,7 +67,7 @@ func createLogger(config loggerConfig) *zap.Logger {
 func customDevLogFormat(entry zapcore.Entry, logName string) string {
 	timeStr := fmt.Sprintf("[%s]", entry.Time.Format(timeFormat))
 	levelStr := fmt.Sprintf("[%s]", strings.ToUpper(entry.Level.String()))
-	nameStr := fmt.Sprintf("[%s]", strings.ToUpper(logName))
+	nameStr := fmt.Sprintf("[%s:%s]", globals.SERVER_NAME, strings.ToUpper(logName))
 	callerStr := fmt.Sprintf("[%s:%d]", entry.Caller.File, entry.Caller.Line)
 	msgStr := entry.Message + "\n"
 
@@ -96,7 +97,7 @@ var Log *zap.Logger
 func customTraceLogFormat(entry zapcore.Entry, logName string) string {
 	timeStr := fmt.Sprintf("[%s]", entry.Time.Format(timeFormat))
 	levelStr := fmt.Sprintf("[%s]", strings.ToUpper(entry.Level.String()))
-	nameStr := fmt.Sprintf("[%s]", strings.ToUpper(logName))
+	nameStr := fmt.Sprintf("[%s:%s]", globals.SERVER_NAME, strings.ToUpper(logName))
 	msgStr := entry.Message + "\n"
 
 	var line string
@@ -125,7 +126,7 @@ var TraceLog *zap.Logger
 func customSystemLoggerFormat(entry zapcore.Entry, logName string) string {
 	timeStr := fmt.Sprintf("[%s]", entry.Time.Format(timeFormat))
 	levelStr := fmt.Sprintf("[%s]", strings.ToUpper(entry.Level.String()))
-	nameStr := fmt.Sprintf("[%s]", strings.ToUpper(logName))
+	nameStr := fmt.Sprintf("[%s:%s]", globals.SERVER_NAME, strings.ToUpper(logName))
 	msgStr := entry.Message + "\n"
 
 	var line string

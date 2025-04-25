@@ -12,11 +12,23 @@ type otherAuthService struct{}
 
 var OtherAuthService = otherAuthService{}
 
-func (svc otherAuthService) OtherAuth(c *gin.Context) {
-	path := c.Param("path")
-
-	headerJson, _ := json.MarshalIndent(c.Request.Header, "", "    ")
+func (svc otherAuthService) authenticate(path string, headers map[string][]string) (bool, map[string]string) {
+	headerJson, _ := json.MarshalIndent(headers, "", "    ")
 	logger.Log.Info(string(headerJson))
 
-	response.Ctx(c).Success(map[string]string{"path": path, "auth": "other"})
+	// panic(globals.NewException("other auth service not implemented"))
+	return true, map[string]string{"path": path, "auth": "other"}
+}
+
+// ============================================ gin接口处理函数 ============================================
+func (svc otherAuthService) OtherAuth(c *gin.Context) {
+	path := c.Param("path")
+	ok, data := svc.authenticate(path, c.Request.Header)
+
+	if !ok {
+		response.Ctx(c).Failed("Authentication failed")
+		return
+	}
+
+	response.Ctx(c).Success(data)
 }

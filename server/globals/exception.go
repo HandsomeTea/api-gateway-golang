@@ -1,11 +1,12 @@
 package globals
 
 import (
-	"api-gateway-golang/server/configs/logger"
 	"fmt"
 
 	httpError "api-gateway-golang/server/configs/error"
 )
+
+const SERVER_NAME = "api-gateway"
 
 type HttpException struct {
 	Message string   `json:"message"`
@@ -15,8 +16,6 @@ type HttpException struct {
 }
 
 func (e *HttpException) Error() string {
-	logger.SystemLog.Error(e.Message)
-
 	return e.Message
 }
 
@@ -55,19 +54,17 @@ func NewException(args ...any) *HttpException {
 			}
 		}
 	}
-
-	defaultSource := "api-gateway-golang"
 	hasSource := false
 
 	for _, s := range e.Source {
-		if s == defaultSource {
+		if s == SERVER_NAME {
 			hasSource = true
 			break
 		}
 	}
 
 	if !hasSource {
-		e.Source = append(e.Source, defaultSource)
+		e.Source = append(e.Source, SERVER_NAME)
 	}
 
 	if httpError.ErrorCodeMap[e.Code] == 0 {
