@@ -6,8 +6,6 @@ import (
 	httpError "api-gateway-golang/server/configs/error"
 )
 
-const SERVER_NAME = "api-gateway"
-
 type HttpException struct {
 	Message string   `json:"message"`
 	Code    string   `json:"code"`

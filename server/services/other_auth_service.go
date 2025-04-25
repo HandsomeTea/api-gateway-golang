@@ -12,7 +12,7 @@ type otherAuthService struct{}
 
 var OtherAuthService = otherAuthService{}
 
-func (svc otherAuthService) authenticate(path string, headers map[string][]string) (bool, map[string]string) {
+func (svc otherAuthService) AuthenticateService(path string, headers map[string][]string) (bool, map[string]string) {
 	headerJson, _ := json.MarshalIndent(headers, "", "    ")
 	logger.Log.Info(string(headerJson))
 
@@ -23,7 +23,7 @@ func (svc otherAuthService) authenticate(path string, headers map[string][]strin
 // ============================================ gin接口处理函数 ============================================
 func (svc otherAuthService) OtherAuth(c *gin.Context) {
 	path := c.Param("path")
-	ok, data := svc.authenticate(path, c.Request.Header)
+	ok, data := svc.AuthenticateService(path, c.Request.Header)
 
 	if !ok {
 		response.Ctx(c).Failed("Authentication failed")
